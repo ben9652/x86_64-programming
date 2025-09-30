@@ -1,0 +1,37 @@
+# Comandos GDB para debuggear el segmentation fault
+
+# 1. Iniciar GDB con el programa
+gdb -q .\bin\main.exe
+
+# 2. Configurar para capturar el segfault
+(gdb) handle SIGSEGV stop print
+
+# 3. Poner breakpoint justo antes del problema
+(gdb) break print_uint
+
+# 4. Ejecutar
+(gdb) run
+
+# 5. Cuando llegue a print_uint, examinar el stack
+(gdb) x/10x $rsp
+(gdb) info registers
+
+# 6. Continuar paso a paso hasta el problema
+(gdb) stepi
+
+# 7. Cuando ocurra el segfault, examinar:
+(gdb) backtrace
+(gdb) info registers
+(gdb) x/10x $rsp
+(gdb) x/10i $rip
+
+# 8. Examinar la dirección de retorno que se corrompió
+(gdb) x/x $rsp
+
+# Comandos específicos para tu caso:
+# Ver si la dirección de retorno es válida
+(gdb) info symbol *($rsp)
+
+# Ver el contenido de los registros cuando se corrompen
+(gdb) watch $rdi
+(gdb) watch $rsi

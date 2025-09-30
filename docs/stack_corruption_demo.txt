@@ -1,0 +1,55 @@
+# Demostración paso a paso de por qué falla tu código original
+
+## SIMULACIÓN DEL PROBLEMA:
+
+### Estado inicial cuando se llama print_uint():
+RSP = 0x1000      [dirección de retorno = 0x401234] ← donde debe volver main()
+RSP+8 = 0x1008    [basura del stack = 0xDEADBEEF]
+
+### Tu código original:
+```asm
+mov (%rsp), %rdi      # %rdi = 0x401234 (dirección de retorno - CORRECTO)
+mov 8(%rsp), %rsi     # %rsi = 0xDEADBEEF (basura - MALO pero no fatal aún)
+
+# Después de mucho código que usa %rdi para otras cosas:
+# Por ejemplo: div %rbx modifica %rdi implícitamente
+# O: lea (%rsp,%rax,8), %rsp usa %rdi como temporal
+# Resultado: %rdi = 0x12345678 (¡YA NO ES 0x401234!)
+
+# Al final de la función:
+mov %rdi, (%rsp)      # Escribes 0x12345678 en lugar de 0x401234
+                      # ¡Has corrompido la dirección de retorno!
+ret                   # CPU salta a 0x12345678 (dirección inválida)
+                      # = SEGMENTATION FAULT
+```
+
+### Mi código corregido:
+```asm
+push %rbp             # Stack: [ret_addr][rbp_old] ← RSP
+mov %rsp, %rbp        # RBP apunta a rbp_old
+push %rdi             # Stack: [ret_addr][rbp_old][rdi_old] ← RSP
+push %rsi             # Stack: [ret_addr][rbp_old][rdi_old][rsi_old] ← RSP
+
+# Todo el código usa registros libremente
+# La dirección de retorno está INTACTA en su posición original
+
+# Al final:
+pop %rsi              # RSP: [ret_addr][rbp_old][rdi_old]
+pop %rdi              # RSP: [ret_addr][rbp_old]  
+pop %rbp              # RSP: [ret_addr] ← ¡Dirección de retorno intacta!
+ret                   # CPU salta a dirección correcta = SUCCESS
+```
+
+## VISUALIZACIÓN DEL STACK:
+
+### Tu método (MALO):
+Posición    Antes       Durante      Después     Resultado
+0x1000:    ret_addr  →  ret_addr  →  ¡BASURA!  →  SEGFAULT
+0x1008:    basura    →  basura    →  basura    →  
+
+### Mi método (BUENO):  
+Posición    Antes       Durante         Después     Resultado
+0x1000:    ret_addr  →  ret_addr     →  ret_addr  →  SUCCESS
+0x0FF8:               →  rbp_guardado →            →  
+0x0FF0:               →  rdi_guardado →            →
+0x0FE8:               →  rsi_guardado →            →

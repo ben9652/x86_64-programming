@@ -1,0 +1,51 @@
+# Por qué syscalls directas causan problemas en Windows x64
+
+## DIFERENCIAS ENTRE LINUX Y WINDOWS:
+
+### EN LINUX (donde syscalls directas funcionan):
+- Kernel expone syscalls estables con números fijos
+- syscall es la forma oficial de llamar al kernel
+- Ejemplo: write() syscall #1
+
+### EN WINDOWS (donde syscalls directas son problemáticas):
+- Los números de syscall CAMBIAN entre versiones de Windows
+- Microsoft NO garantiza estabilidad de syscalls directas
+- La forma oficial es usar APIs (WriteFile, etc.)
+
+## EJEMPLO DEL PROBLEMA:
+
+Tu código:
+```asm
+mov $0x08, %eax       # Asumes que NtWriteFile es syscall #8
+syscall               # Pero esto puede ser diferente en:
+                      # - Windows 10 vs Windows 11
+                      # - Diferentes builds
+                      # - 32-bit vs 64-bit
+```
+
+Mi código corregido:
+```asm
+call WriteFile        # Esto SIEMPRE funciona porque:
+                      # - Windows mantiene ABI estable para APIs
+                      # - WriteFile internamente llama al syscall correcto
+                      # - Funciona en todas las versiones de Windows
+```
+
+## CALLING CONVENTION DE WINDOWS X64:
+
+Registros para parámetros:
+- 1er parámetro: RCX
+- 2do parámetro: RDX  
+- 3er parámetro: R8
+- 4to parámetro: R9
+- 5to+ parámetros: en el stack
+
+SHADOW SPACE requerido:
+- Incluso si una función toma <4 parámetros
+- DEBES reservar 32 bytes en el stack
+- Para que la función llamada pueda "spillar" los registros
+
+REGISTROS NO-VOLÁTILES (deben preservarse):
+- RBX, RBP, RDI, RSI, RSP
+- R12, R13, R14, R15
+- Si los modificas, DEBES restaurarlos antes de return

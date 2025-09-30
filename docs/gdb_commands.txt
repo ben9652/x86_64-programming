@@ -1,0 +1,62 @@
+# Comandos básicos de GDB para debuggear ensamblador x86_64
+
+## Iniciar debugging:
+gdb ./bin/main.exe
+
+## Comandos de navegación:
+(gdb) break main          # Poner breakpoint en main
+(gdb) break *0x401000     # Breakpoint en dirección específica
+(gdb) run                 # Ejecutar el programa
+(gdb) step                # Ejecutar una instrucción (step into)
+(gdb) stepi               # Ejecutar una instrucción de ensamblador
+(gdb) next                # Ejecutar hasta la siguiente línea (step over)
+(gdb) nexti               # Siguiente instrucción de ensamblador (step over)
+(gdb) continue            # Continuar ejecución
+(gdb) finish              # Ejecutar hasta salir de la función actual
+
+## Examinar registros:
+(gdb) info registers      # Mostrar todos los registros
+(gdb) info reg rax        # Mostrar registro específico
+(gdb) p $rax              # Imprimir valor del registro RAX
+(gdb) p/x $rax            # Imprimir en hexadecimal
+(gdb) p/d $rax            # Imprimir en decimal
+(gdb) p/t $rax            # Imprimir en binario
+
+## Examinar memoria:
+(gdb) x/10x $rsp          # Examinar 10 words en hex desde RSP
+(gdb) x/10i $rip          # Examinar 10 instrucciones desde RIP
+(gdb) x/s 0x401234        # Examinar string en dirección
+(gdb) x/10b 0x401234      # Examinar 10 bytes
+(gdb) disas main          # Desensamblar función main
+(gdb) disas               # Desensamblar función actual
+(gdb) disas /m main       # Desensamblar con código fuente mezclado
+
+## Manipular registros y memoria:
+(gdb) set $rax = 100      # Cambiar valor del registro RAX
+(gdb) set {long}0x401234 = 0x12345678  # Cambiar valor en memoria
+
+## Información del programa:
+(gdb) info breakpoints    # Listar breakpoints
+(gdb) info stack          # Mostrar stack trace
+(gdb) backtrace           # Mostrar call stack
+(gdb) info functions      # Listar funciones
+(gdb) info variables      # Listar variables
+
+## Watchpoints (observar cambios):
+(gdb) watch *0x401234     # Observar cambios en dirección de memoria
+(gdb) rwatch *0x401234    # Observar lecturas de memoria
+(gdb) awatch *0x401234    # Observar accesos (lectura/escritura)
+
+## Comandos útiles:
+(gdb) layout asm         # Mostrar vista de ensamblador en TUI
+(gdb) layout regs        # Mostrar registros en TUI
+(gdb) refresh            # Refrescar pantalla TUI
+(gdb) quit               # Salir de GDB
+
+## Ejemplo de sesión típica:
+# gdb ./bin/main.exe
+# (gdb) break main
+# (gdb) run
+# (gdb) stepi
+# (gdb) info registers
+# (gdb) x/10x $rsp

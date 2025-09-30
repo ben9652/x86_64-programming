@@ -1,0 +1,58 @@
+# Sesión completa de debugging para main.exe
+
+## Iniciar GDB
+gdb -q .\bin\main.exe
+
+## Comandos básicos para debuggear tu programa:
+
+# 1. Ver el código desensamblado de main
+(gdb) disassemble main
+# Esto te mostrará las instrucciones exactas en main
+
+# 2. Poner breakpoint en main
+(gdb) break main
+# Resultado: Breakpoint 1 at 0x140001150
+
+# 3. Ejecutar el programa
+(gdb) run
+# El programa se detiene en main
+
+# 4. Ver registros antes de la primera instrucción
+(gdb) info registers
+# Te muestra RCX, RAX, RSP, etc.
+
+# 5. Ejecutar la instrucción mov $123918, %rcx
+(gdb) stepi
+# Ahora RCX debe contener 123918
+
+# 6. Verificar que RCX tiene el valor correcto
+(gdb) print $rcx
+# Debe mostrar: $1 = 123918
+
+# 7. Ejecutar la llamada a print_uint
+(gdb) stepi
+# Esto ejecuta la llamada y verás "123918" en pantalla
+
+# 8. Continuar hasta el final
+(gdb) continue
+# El programa termina normalmente
+
+## Comandos útiles adicionales:
+
+# Ver memoria en hexadecimal desde RSP (stack)
+(gdb) x/10x $rsp
+
+# Ver memoria como instrucciones desde RIP
+(gdb) x/10i $rip
+
+# Poner breakpoint en dirección específica
+(gdb) break *0x140001157
+
+# Ver todas las funciones disponibles
+(gdb) info functions
+
+# Examinar el stack trace
+(gdb) backtrace
+
+# Salir de GDB
+(gdb) quit

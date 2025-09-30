@@ -1,0 +1,28 @@
+# Comandos GDB para tu programa x86_64
+
+# 1. Poner un breakpoint en main (entrada del programa)
+break main
+
+# 2. Ejecutar el programa
+run
+
+# 3. Ver el código desensamblado de main
+disassemble main
+
+# 4. Ejecutar instrucción por instrucción
+stepi
+
+# 5. Ver el estado de los registros
+info registers
+
+# 6. Ver el contenido del registro RCX (donde pones el número 123918)
+print $rcx
+
+# 7. Ver el stack pointer
+x/10x $rsp
+
+# 8. Continuar la ejecución
+continue
+
+# 9. Salir de GDB
+quit
